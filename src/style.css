@@ -1,0 +1,380 @@
+/* Minecraft aesthetic — Craft Craft */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --mc-brown: #5a3a1a;
+  --mc-dark: #1a1a1a;
+  --mc-green: #4caf50;
+  --mc-gray: #888;
+  --mc-gold: #f5c400;
+  --mc-slot-bg: rgba(30, 30, 30, 0.85);
+  --mc-slot-border: #555;
+  --mc-slot-active: #fff;
+  --mc-text: #e0e0e0;
+  --mc-panel-bg: rgba(0, 0, 0, 0.75);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  user-select: none;
+}
+
+#game-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ─── Crosshair ───────────────────────────────────────────────── */
+#crosshair {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 50;
+}
+.crosshair-h {
+  width: 22px; height: 2px;
+  background: rgba(255,255,255,0.85);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.crosshair-v {
+  width: 2px; height: 22px;
+  background: rgba(255,255,255,0.85);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ─── Hotbar ──────────────────────────────────────────────────── */
+#hotbar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 50;
+}
+.hotbar-slot {
+  width: 52px; height: 52px;
+  background: var(--mc-slot-bg);
+  border: 2px solid var(--mc-slot-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: default;
+  image-rendering: pixelated;
+  transition: border-color 0.05s;
+}
+.hotbar-slot.active {
+  border-color: var(--mc-slot-active);
+  border-width: 3px;
+  box-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+.hotbar-slot canvas {
+  width: 36px; height: 36px;
+  image-rendering: pixelated;
+}
+.slot-number {
+  position: absolute;
+  top: 2px; left: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ─── Health Bar ──────────────────────────────────────────────── */
+#health-bar {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 50;
+}
+.health-label { color: #e74c3c; font-size: 18px; }
+#health-hearts { display: flex; gap: 3px; }
+.heart { width: 14px; height: 14px; font-size: 13px; }
+
+/* ─── Debug Overlay ───────────────────────────────────────────── */
+#debug-overlay {
+  position: fixed;
+  top: 8px; left: 8px;
+  z-index: 100;
+  pointer-events: none;
+}
+.debug-panel {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.8;
+  padding: 8px 12px;
+  border-radius: 4px;
+  min-width: 200px;
+}
+.debug-divider {
+  color: var(--mc-gold);
+  margin: 4px 0;
+}
+
+/* ─── Selected block toast ────────────────────────────────────── */
+#selected-block-name {
+  position: fixed;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  z-index: 60;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#selected-block-name.visible { opacity: 1; }
+
+/* ─── Start / Pause Menu ──────────────────────────────────────── */
+#start-screen, #pause-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  background: rgba(20,20,20,0.95);
+  border: 3px solid #555;
+  border-radius: 6px;
+  max-width: 460px;
+  width: 90%;
+  text-align: center;
+}
+.game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 2rem;
+  color: var(--mc-gold);
+  text-shadow: 3px 3px 0 #7a5500, -1px -1px 0 #a06000;
+  letter-spacing: 2px;
+  line-height: 1.4;
+}
+.game-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #aaa;
+}
+.menu-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  padding: 10px 28px;
+  background: #4a7c2a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 280px;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 4px 0 #2a4a15;
+}
+.menu-btn:hover { background: #5a9c35; transform: translateY(-1px); }
+.menu-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2a4a15; }
+.menu-btn-red { background: #8b2020; box-shadow: 0 4px 0 #4a1010; }
+.menu-btn-red:hover { background: #b03030; }
+.menu-controls {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.42rem;
+  color: #aaa;
+  line-height: 2.2;
+  text-align: left;
+  width: 100%;
+  border-top: 1px solid #333;
+  padding-top: 12px;
+}
+.menu-controls h3 { color: var(--mc-gold); margin-bottom: 8px; }
+
+/* ─── Inventory Screen ────────────────────────────────────────── */
+#inventory-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.inventory-container {
+  background: rgba(25,25,25,0.97);
+  border: 3px solid #666;
+  border-radius: 6px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-height: 96vh;
+  overflow-y: auto;
+}
+.inventory-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem;
+  color: var(--mc-gold);
+}
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 52px);
+  grid-template-rows: repeat(3, 52px);
+  gap: 4px;
+}
+.inv-slot {
+  width: 52px; height: 52px;
+  background: var(--mc-slot-bg);
+  border: 2px solid var(--mc-slot-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.1s;
+  image-rendering: pixelated;
+}
+.inv-slot:hover { border-color: #aaa; }
+.inv-slot canvas { width: 36px; height: 36px; image-rendering: pixelated; }
+.inv-slot .item-count {
+  position: absolute;
+  bottom: 2px; right: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+/* ─── Crafting ────────────────────────────────────────────────── */
+.crafting-section {
+  width: 100%;
+  border-top: 1px solid #444;
+  padding-top: 12px;
+}
+.crafting-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: #ccc;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.crafting-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.crafting-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(3, 48px);
+  gap: 3px;
+}
+.crafting-slot {
+  width: 48px; height: 48px;
+  background: rgba(20,20,20,0.8);
+  border: 2px solid #444;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  image-rendering: pixelated;
+}
+.crafting-slot:hover { border-color: #888; }
+.crafting-arrow {
+  font-size: 1.5rem;
+  color: var(--mc-gold);
+}
+.crafting-result-slot {
+  width: 56px; height: 56px;
+  background: rgba(20,20,20,0.9);
+  border: 3px solid #666;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  image-rendering: pixelated;
+}
+.crafting-result-slot:hover { border-color: #aaa; }
+
+.inventory-hotbar-row {
+  display: flex;
+  gap: 4px;
+  border-top: 1px solid #444;
+  padding-top: 12px;
+}
+
+/* ─── Loading Screen ──────────────────────────────────────────── */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  flex-direction: column;
+  gap: 24px;
+}
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+}
+.loading-bar-outer {
+  width: 100%;
+  height: 20px;
+  background: #222;
+  border: 2px solid #555;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.loading-bar-inner {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4a7c2a, #6ab040);
+  transition: width 0.3s ease;
+}
+#loading-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: #aaa;
+}
+
+/* ─── Utility ─────────────────────────────────────────────────── */
+.hidden { display: none !important; }
