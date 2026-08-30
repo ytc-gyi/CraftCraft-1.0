@@ -1,0 +1,15 @@
+[gd_scene load_steps=5 format=3 uid="uid://cmain1234567"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://cworld123456" path="res://scenes/world.tscn" id="2_world"]
+[ext_resource type="PackedScene" uid="uid://cplayer123456" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" uid="uid://cui123456789" path="res://scenes/ui.tscn" id="4_ui"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="World" parent="." instance=ExtResource("2_world")]
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+
+[node name="UI" parent="." instance=ExtResource("4_ui")]
